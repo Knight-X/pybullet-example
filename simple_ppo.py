@@ -33,12 +33,12 @@ class CustomPolicy(FeedForwardPolicy):
                                            feature_extraction="mlp")
 
 def main():
-    num_cpu = 2 
+    num_cpu = 16 
     env = SubprocVecEnv([make_env(rank=i) for i in range(num_cpu)])
     model = PPO2(CustomPolicy, env, verbose=1)
 
     # Train and Save the agent
-    model.learn(total_timesteps=1e5)
+    model.learn(total_timesteps=1e6)
     model.save("ppo_save")
 
     # delete trained model to demonstrate loading

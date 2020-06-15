@@ -3,10 +3,8 @@ import math
 import time
 import numpy as np
 import gym
-
 import pybullet as p
 import pybullet_data
-
 from .balancebot import BalanceBot
 from gym import spaces
 
@@ -24,9 +22,10 @@ class BalancebotEnv(gym.Env):
         self._is_render = render
         self._last_frame_time = 0.0
         self.total_step = 0
+        self.prev_action = 0
 
         self.action_space = spaces.Box(-1, 1, shape=(1,), dtype=np.float32)
-        self.observation_space = spaces.Box(-1, 1, shape=(4,), dtype=np.float32)
+        self.observation_space = spaces.Box(-1, 1, shape=(8,), dtype=np.float32)
       
         if (render):
             p.connect(p.GUI)
@@ -35,16 +34,23 @@ class BalancebotEnv(gym.Env):
 
     def _getObservation(self):
 
-        ang, _, _ = self.balancebot.getBaseRollPitchYaw()
-        vel, _     = self.balancebot.getMotorStrength()
+        row, pitch, _ = self.balancebot.getBaseRollPitchYaw()
+        vel, vel2     = self.balancebot.getMotorStrength()
         
-        ang = (ang / 1.5707963) / (0.3925 / 1.5707963)
+        row = (row / 1.5707963) 
+        pitch = (pitch / 1.5707963)
+
+        self._observation[7] = self._observation[5]
+        self._observation[6] = self._observation[4]
+        self._observation[5] = self.prev_action 
+        self._observation[4] = self.prev_action 
+
         
         self._observation[3] = self._observation[1]
         self._observation[2] = self._observation[0]
 
-        self._observation[1] = vel
-        self._observation[0] = ang
+        self._observation[1] = pitch
+        self._observation[0] = row 
       
         observation = np.array(self._observation).flatten()
         return observation
@@ -65,7 +71,7 @@ class BalancebotEnv(gym.Env):
                 time.sleep(time_to_sleep)
 
         self.balancebot.step(action)
-
+        self.prev_action = action
         observation = self._getObservation()
         self.total_step += 1
         
@@ -79,7 +85,7 @@ class BalancebotEnv(gym.Env):
 
         plane = p.loadURDF(os.path.join(self._urdfRoot,"plane.urdf"), [0, 0, 0])
 
-        self._observation = [0, 0, 0, 0]
+        self._observation = [0, 0, 0, 0, 0, 0, 0, 0]
         self._objectives = []
 
         self.balancebot = BalanceBot(

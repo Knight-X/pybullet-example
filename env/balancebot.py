@@ -1,7 +1,6 @@
 import os
 import collections
 import numpy as np
-
 class BalanceBot(object):
     
     def __init__(self, 
@@ -146,7 +145,4 @@ class BalanceBot(object):
         r_motor = self._motor_strength["torso_r_wheel"]
 
         return np.array([l_motor, r_motor])
-
-
-   
 
