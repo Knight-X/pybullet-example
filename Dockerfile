@@ -9,7 +9,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 RUN python3 -m pip install numpy torch torchvision
 
-RUN pip install jupyter matplotlib pybullet tqdm stable-baselines papermill nbdime tensorflow==1.4.0 \
+RUN pip install jupyter matplotlib pybullet tqdm stable-baselines papermill nbdime tensorflow==1.14.0 \
 	cloudpickle==1.2.0 bleach==1.5.0
 
 
