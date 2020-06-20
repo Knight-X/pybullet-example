@@ -33,7 +33,7 @@ class CustomPolicy(FeedForwardPolicy):
                                            feature_extraction="mlp")
 
 def main():
-    num_cpu = 16 
+    num_cpu = 16
     env = SubprocVecEnv([make_env(rank=i) for i in range(num_cpu)])
     model = PPO2(CustomPolicy, env, verbose=1)
 

@@ -58,7 +58,7 @@ class BalanceBot(object):
         for wheel in ['torso_l_wheel', 'torso_r_wheel']:
             wheelid = self._joint_name_to_id[wheel]
             self._p.setJointMotorControl2(self.balancebot_id,wheelid,self._p.VELOCITY_CONTROL,targetVelocity=0,force=0)
-
+        self._p.changeDynamics(self.balancebot_id, 1, mass=0.015 * (1.0 + np.random.uniform(-0.04, 0.04)))
         self._observation_history.clear()
         self.receiveObservation()
         
@@ -146,3 +146,12 @@ class BalanceBot(object):
 
         return np.array([l_motor, r_motor])
 
+    def random_torso_mass(self):
+        return 3
+
+    def random_torso_inertia(self):
+        return 3
+
+
+    def random_wheel_mass(self):
+        return 3 
