@@ -1,6 +1,10 @@
 import os
+import time
+import random
 import collections
 import numpy as np
+from urdfpy import URDF
+
 class BalanceBot(object):
     
     def __init__(self, 
@@ -40,6 +44,7 @@ class BalanceBot(object):
         self._wheel_joint_id = [0, 1]
 
     def reset(self):
+        self.origin_urdf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "urdfs/balancebot_simple.urdf")
         
         random_init_angle = [np.random.uniform(-0.05, 0.05),
                         np.random.uniform(-0.01, 0.01),
@@ -47,8 +52,7 @@ class BalanceBot(object):
                         
         random_init_orient = self._p.getQuaternionFromEuler(random_init_angle)
 
-        urdf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "balancebot_simple.urdf")
-        self.balancebot_id = self._p.loadURDF(urdf_file, 
+        self.balancebot_id = self._p.loadURDF(self.origin_urdf_file, 
                                                 basePosition=[0, 0, 0.01],
                                                 baseOrientation=random_init_orient)
 
@@ -58,7 +62,9 @@ class BalanceBot(object):
         for wheel in ['torso_l_wheel', 'torso_r_wheel']:
             wheelid = self._joint_name_to_id[wheel]
             self._p.setJointMotorControl2(self.balancebot_id,wheelid,self._p.VELOCITY_CONTROL,targetVelocity=0,force=0)
-        self._p.changeDynamics(self.balancebot_id, 1, mass=0.015 * (1.0 + np.random.uniform(-0.04, 0.04)))
+        self.changeBaseDynamics()
+        self.changeRightWheelDynamics()
+        self.changeLeftWheelDynamics()
         self._observation_history.clear()
         self.receiveObservation()
         
@@ -146,12 +152,49 @@ class BalanceBot(object):
 
         return np.array([l_motor, r_motor])
 
-    def random_torso_mass(self):
-        return 3
+    def changeBaseInertia(self):
+        robot = URDF.load(self.origin_urdf_file)
+        first_inertia = robot.links[0].inertial.inertia[0][0]
+        second_inertia = robot.links[0].inertial.inertia[1][1]
+        third_inertia = robot.links[0].inertial.inertia[2][2]
+        robot.links[0].inertial.inertia[0][0] = first_inertia * (1.0 + np.random.uniform(-0.04, 0.04))
+        robot.links[0].inertial.inertia[1][1] = second_inertia * (1.0 + np.random.uniform(-0.04, 0.04))
+        robot.links[0].inertial.inertia[2][2] = third_inertia * (1.0 + np.random.uniform(-0.04, 0.04))
+        robot.save(self.modify_urdf_file)
 
-    def random_torso_inertia(self):
-        return 3
 
+    def changeBaseDynamics(self):
+        data = self._p.getDynamicsInfo(self.balancebot_id, -1)
+        self._p.changeDynamics(self.balancebot_id, -1, mass=data[0] * (1.0 + np.random.uniform(-0.04, 0.04)))
+        self._p.changeDynamics(self.balancebot_id, -1, lateralFriction = data[1] * (1.0 + np.random.uniform(-0.04, 0.04)))
+        inertia = list(data[2])
+        inertia[0] = inertia[0] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        inertia[1] = inertia[1] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        inertia[2] = inertia[2] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        self._p.changeDynamics(self.balancebot_id, -1, localInertiaDiagonal = (inertia[0], inertia[1], inertia[2]))
+           
+       
+    def changeRightWheelDynamics(self):
+        data = self._p.getDynamicsInfo(self.balancebot_id, 0)
+        self._p.changeDynamics(self.balancebot_id, 0, mass=data[0] * (1.0 + np.random.uniform(-0.04, 0.04)))
+        self._p.changeDynamics(self.balancebot_id, 0, lateralFriction = data[1] * (1.0 + np.random.uniform(-0.04, 0.04)))
+        inertia = list(data[2])
+        inertia[0] = inertia[0] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        inertia[1] = inertia[1] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        inertia[2] = inertia[2] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        self._p.changeDynamics(self.balancebot_id, 0, localInertiaDiagonal = (inertia[0], inertia[1], inertia[2]))
+       
+    def changeLeftWheelDynamics(self):
+        data = self._p.getDynamicsInfo(self.balancebot_id, 1)
+        self._p.changeDynamics(self.balancebot_id, 1, mass=data[0] * (1.0 + np.random.uniform(-0.04, 0.04)))
+        self._p.changeDynamics(self.balancebot_id, 1, lateralFriction = data[1] * (1.0 + np.random.uniform(-0.04, 0.04)))
+        inertia = list(data[2])
+        inertia[0] = inertia[0] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        inertia[1] = inertia[1] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        inertia[2] = inertia[2] * (1.0 + np.random.uniform(-0.04, 0.04)) 
+        self._p.changeDynamics(self.balancebot_id, 1, localInertiaDiagonal = (inertia[0], inertia[1], inertia[2]))
 
-    def random_wheel_mass(self):
-        return 3 
+    def getState(self, id):
+      return self._p.getDynamicsInfo(self.balancebot_id, id)
+
+    

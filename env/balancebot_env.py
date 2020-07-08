@@ -7,6 +7,7 @@ import pybullet as p
 import pybullet_data
 from .balancebot import BalanceBot
 from gym import spaces
+import random
 
 class BalancebotEnv(gym.Env):
 
@@ -15,12 +16,15 @@ class BalancebotEnv(gym.Env):
 
         self._urdfRoot = pybullet_data.getDataPath()
         self._time_step = 0.002
-        self._control_latency = self._time_step * 1.0
-        self._action_repeat = 1
+        self._time_random = np.random.randint(1, 3)
+        self._control_latency = self._time_step * self._time_random 
+        self._action_repeat = np.random.randint(1, 3) 
+
         
         self.vis_time_step = 0.002
         self._is_render = render
         self._last_frame_time = 0.0
+        self._balancebot = 0
         self.total_step = 0
         self.prev_action = 0
 
@@ -93,6 +97,7 @@ class BalancebotEnv(gym.Env):
             action_repeat=self._action_repeat, 
             time_step=self._time_step,
             control_latency=self._control_latency)
+        self._balancebot = self.balancebot
 
         self.balancebot.reset()
         observation = self._getObservation()
@@ -145,5 +150,4 @@ class BalancebotEnv(gym.Env):
 
     def close(self):
         return None
-
 
