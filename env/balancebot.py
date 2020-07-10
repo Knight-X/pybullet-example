@@ -28,6 +28,10 @@ class BalanceBot(object):
         self._control_latency = control_latency
         self._observation_history = collections.deque(maxlen=5)
         self._delayed_observation = []
+        self.cax = 0.0
+        self.cay = 0.0
+        self.pax = 0.0
+        self.pay = 0.0
 
 
     def _buildJointNameToIdDict(self):
@@ -69,6 +73,10 @@ class BalanceBot(object):
         self.changeRightWheelDynamics()
         self.changeLeftWheelDynamics()
         self._observation_history.clear()
+        self.cax = 0.0
+        self.cay = 0.0
+        self.pax = 0.0
+        self.pay = 0.0
         self.receiveObservation()
         
         return None

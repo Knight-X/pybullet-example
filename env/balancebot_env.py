@@ -113,6 +113,10 @@ class BalancebotEnv(gym.Env):
 
         curr_p, curr_v, curr_a, curr_w = self.balancebot._observation_history[0]
         prev_p, prev_v, prev_a, prev_w = self.balancebot._observation_history[1]
+        curr_x_a = self.balancebot.cax
+        curr_y_a = self.balancebot.cay
+        prev_x_a = self.balancebot.pax
+        prev_y_a = self.balancebot.pay
 
         cx, cy, cz = curr_p
         cr, cp, cy = curr_a
@@ -124,6 +128,10 @@ class BalancebotEnv(gym.Env):
         pvx, pvy, pvz = prev_v
         pwr, pwp, pwy = prev_w
         
+        prev_x_a = curr_x_a
+        prev_y_a = curr_y_a
+        curr_x_a = abs(cvx - pvx)
+        curr_y_a = abs(cvy - pvy)
         
         ang_reward = 1.0 - abs(cr+pr)/2.0
         ang_vel_reward = abs(cwr+pwr)/2.0
@@ -131,10 +139,10 @@ class BalancebotEnv(gym.Env):
         pos_reward = abs(cx+px)/2.0 + abs(cy+py)/2.0
         pos_vel_reward = abs(cvx+pvx)/2.0 + abs(cvy+pvy)/2.0
         
-
+        acc_reward = abs(curr_x_a + prev_x_a)/2.0 + abs(curr_y_a + prev_y_a)/2.0
         self._objectives.append([pos_reward, pos_vel_reward, ang_vel_reward, ang_reward])
         
-        return -0.00*pos_reward -0.01*pos_vel_reward -0.00*ang_vel_reward  +1.00*ang_reward
+        return -0.00*pos_reward -0.01*pos_vel_reward -0.00*ang_vel_reward -0.01*acc_reward + 1.00*ang_reward
 
     def get_objectives(self):
         return self._objectives
