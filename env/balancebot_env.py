@@ -27,6 +27,7 @@ class BalancebotEnv(gym.Env):
         self._balancebot = 0
         self.total_step = 0
         self.prev_action = 0
+        self._random_dynamics = 0.1 
 
         self.action_space = spaces.Box(-1, 1, shape=(1,), dtype=np.float32)
         self.observation_space = spaces.Box(-1, 1, shape=(8,), dtype=np.float32)
@@ -84,6 +85,9 @@ class BalancebotEnv(gym.Env):
     def reset(self):
         
         p.resetSimulation()
+        self._time_random = np.random.randint(1, 3)
+        self._control_latency = self._time_step * self._time_random
+        self._action_repeat = np.random.randint(1, 3)
         p.setGravity(0,0,-10)
         p.setTimeStep(self._time_step)
 
@@ -96,10 +100,11 @@ class BalancebotEnv(gym.Env):
             pybullet_client=p, 
             action_repeat=self._action_repeat, 
             time_step=self._time_step,
-            control_latency=self._control_latency)
-        self._balancebot = self.balancebot
+            control_latency=self._control_latency,
+            random_dynamics=self._random_dynamics)
 
-        self.balancebot.reset()
+        self._balancebot = self.balancebot
+        self.balancebot.reset(self._random_dynamics)
         observation = self._getObservation()
         return observation
 
