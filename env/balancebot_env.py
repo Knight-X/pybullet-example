@@ -119,12 +119,12 @@ class BalancebotEnv(gym.Env):
         prev_y_a = self.balancebot.pay
 
         cx, cy, cz = curr_p
-        cr, cp, cy = curr_a
+        croll, cpitch, cyaw = curr_a
         cvx, cvy, cvz = curr_v
         cwr, cwp, cwy = curr_w
         
         px, py, pz = prev_p
-        pr, pp, py = prev_a
+        proll, ppitch, pyaw = prev_a
         pvx, pvy, pvz = prev_v
         pwr, pwp, pwy = prev_w
         
@@ -133,7 +133,7 @@ class BalancebotEnv(gym.Env):
         curr_x_a = abs(cvx - pvx)
         curr_y_a = abs(cvy - pvy)
         
-        ang_reward = 1.0 - abs(cr+pr)/2.0
+        ang_reward = 1.0 - abs(croll+proll)/2.0
         ang_vel_reward = abs(cwr+pwr)/2.0
 
         pos_reward = abs(cx+px)/2.0 + abs(cy+py)/2.0
