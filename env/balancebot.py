@@ -129,8 +129,9 @@ class BalanceBot(object):
         
         for motor_name in motor_name_list:
 
-            self._motor_strength[motor_name] = motor_cmd
 
+            motor_cmd = motor_cmd * (1.0 + np.random.uniform(-0.05, 0.05))
+            self._motor_strength[motor_name] = motor_cmd
             self._actual_write_cmd = np.clip(self._motor_strength[motor_name], -1.0, 1.0)
             self._actual_motor_pwm = self._actual_write_cmd * self._max_pwm * self._motor_direction[motor_name] 
             self._setMotorVelocityById(self._joint_name_to_id[motor_name], self._actual_motor_pwm)

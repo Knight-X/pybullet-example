@@ -142,7 +142,7 @@ class BalancebotEnv(gym.Env):
         acc_reward = abs(curr_x_a + prev_x_a)/2.0 + abs(curr_y_a + prev_y_a)/2.0
         self._objectives.append([pos_reward, pos_vel_reward, ang_vel_reward, ang_reward])
         
-        return -0.00*pos_reward -0.01*pos_vel_reward -0.00*ang_vel_reward -0.01*acc_reward + 1.00*ang_reward
+        return -0.00*pos_reward -0.01*pos_vel_reward -0.00*ang_vel_reward -0.05*acc_reward + 1.00*ang_reward
 
     def get_objectives(self):
         return self._objectives
