@@ -142,8 +142,36 @@ class BalancebotEnv(gym.Env):
         acc_reward = abs(curr_x_a + prev_x_a)/2.0 + abs(curr_y_a + prev_y_a)/2.0
         self._objectives.append([pos_reward, pos_vel_reward, ang_vel_reward, ang_reward])
         
-        return -0.00*pos_reward -0.01*pos_vel_reward -0.00*ang_vel_reward -0.05*acc_reward + 1.00*ang_reward
+        return -0.01*pos_reward -0.01*pos_vel_reward -0.00*ang_vel_reward -0.05*acc_reward + 1.00*ang_reward
+    
+    def mb_reward(self, curr_ob, random_action_sequences):
+        curr_roll = curr_ob[0]
+        curr_pitch = curr_ob[1]
+        prev_roll = curr_ob[2]
+        prev_pitch = curr_ob[3]
 
+        curr_left = curr_ob[4]
+        curr_right = curr_ob[5]
+        prev_left = curr_ob[6]
+        prev_right = curr_ob[7]
+        ang_reward = 1.0 - abs(curr_roll+prev_roll)/2.0
+
+        
+        self._objectives.append([ ang_reward])
+        
+        return 1.00*ang_reward
+
+    def get_reward(self, batch_size, observations, actions):
+        rewards = np.zeros(batch_size)
+        for i in range(batch_size):
+            rewards[i] = self.mb_reward(observations[i], actions[i])
+        return rewards
+
+    def get_reward(self, obs, N):
+        rewards = np.zero(N)
+        for i in range(N):
+            rewards[i] = self._reward(obs[i])
+        return rewards
     def get_objectives(self):
         return self._objectives
         
